@@ -1,0 +1,37 @@
+{
+  "name": "study-openapi-responses-20250402",
+  "version": "0.1.0",
+  "description": "",
+  "engines": {
+    "node": ">=23.0.0"
+  },
+  "type": "module",
+  "main": "src/main.mts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node src/main.mts",
+    "test": "vitest run --coverage",
+    "fmt": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koumatsumoto/study-OpenAPI-responses-20250402.git"
+  },
+  "keywords": [],
+  "author": "Kou Matsumoto",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/koumatsumoto/study-OpenAPI-responses-20250402/issues"
+  },
+  "homepage": "https://github.com/koumatsumoto/study-OpenAPI-responses-20250402#readme",
+  "prettier": {
+    "printWidth": 120
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}
