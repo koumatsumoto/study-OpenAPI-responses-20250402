@@ -1,8 +1,8 @@
-import fs from 'fs/promises';
-import path from 'path';
-import * as R from 'remeda';
+import fs from "fs/promises";
+import path from "path";
+import * as R from "remeda";
 
-const CHUNK_SIZE = 100;
+const CHUNK_SIZE = 500;
 
 interface Term {
   number: string;
@@ -90,7 +90,8 @@ export function generateApiRequests(chunks: Term[][]): ApiRequest[] {
         input: [
           {
             role: "system",
-            content: "あなたはシステム開発用語の専門家です。定義の文脈を考慮し、適切な日本語訳と分類を行ってください。出力は指定された形式のみを含め、余計な説明は省いてください。",
+            content:
+              "あなたはシステム開発用語の専門家です。定義の文脈を考慮し、適切な日本語訳と分類を行ってください。出力は指定された形式のみを含め、余計な説明は省いてください。",
           },
           {
             role: "user",
@@ -105,7 +106,7 @@ export function generateApiRequests(chunks: Term[][]): ApiRequest[] {
 export async function main() {
   try {
     // Read input file
-    const inputData = await fs.readFile(path.join('data', 'input.json'), 'utf-8');
+    const inputData = await fs.readFile(path.join("data", "input.json"), "utf-8");
     const terms: Term[] = JSON.parse(inputData);
 
     // Split terms into chunks
@@ -115,16 +116,12 @@ export async function main() {
     const requests = generateApiRequests(chunks);
 
     // Write output file
-    const outputPath = path.join('data', 'output.jsonl');
-    await fs.writeFile(
-      outputPath,
-      requests.map(req => JSON.stringify(req)).join('\n'),
-      'utf-8'
-    );
+    const outputPath = path.join("data", "output.jsonl");
+    await fs.writeFile(outputPath, requests.map((req) => JSON.stringify(req)).join("\n"), "utf-8");
 
     console.log(`Successfully wrote ${requests.length} requests to ${outputPath}`);
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     throw error;
   }
 }
