@@ -28,7 +28,7 @@ interface ApiRequest {
   };
 }
 
-function createPromptTemplate(jsonl: string): string {
+export function createPromptTemplate(jsonl: string): string {
   return `
 以下のシステム開発用語を、定義に基づいて最適な日本語訳と全該当の分類に変換せよ。
 
@@ -62,7 +62,7 @@ ${jsonl}
 `;
 }
 
-function convertTermData(term: Term) {
+export function convertTermData(term: Term) {
   return {
     number: term.number,
     name: term.name,
@@ -70,15 +70,15 @@ function convertTermData(term: Term) {
   };
 }
 
-function convertTermsToJSONL(terms: Term[]) {
+export function convertTermsToJSONL(terms: Term[]) {
   return terms.map((term) => JSON.stringify(convertTermData(term))).join("\n");
 }
 
-function splitTermsIntoChunks(terms: Term[]): Term[][] {
+export function splitTermsIntoChunks(terms: Term[]): Term[][] {
   return R.chunk(terms, CHUNK_SIZE);
 }
 
-function generateApiRequests(chunks: Term[][]): ApiRequest[] {
+export function generateApiRequests(chunks: Term[][]): ApiRequest[] {
   return chunks.map((chunk, index) => {
     const jsonl = convertTermsToJSONL(chunk);
     return {
