@@ -1,0 +1,54 @@
+[
+  {
+    "number": "3.34",
+    "name": "acceptance testing",
+    "definitions": [
+      {
+        "text": "testing conducted to determine whether a system satisfies its acceptance criteria and to enable the customer to determine whether to accept the system"
+      },
+      {
+        "text": "formal testing conducted to enable a user, customer, or other authorized entity to determine whether to accept a system or component",
+        "reference": "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.1"
+      }
+    ],
+    "confer": ["acceptance test", "validation test"]
+  },
+  {
+    "number": "3.35",
+    "name": "accepted deliverables",
+    "definitions": [
+      {
+        "text": "products, results, or capabilities produced by a project and validated by the project customer or sponsors as meeting their specified acceptance criteria",
+        "reference": "A Guide to the Project Management Body of Knowledge (PMBOK® Guide) — Fifth Edition"
+      }
+    ]
+  },
+  {
+    "number": "3.4209",
+    "name": "test bed",
+    "definitions": [
+      {
+        "text": "environment containing the hardware, instrumentation, simulators, software tools, and other support elements needed to conduct a test"
+      }
+    ]
+  },
+  {
+    "number": "3.4210",
+    "name": "test case",
+    "definitions": [
+      {
+        "text": "set of test inputs, execution conditions, and expected results developed for a particular objective, such as to exercise a particular program path or to verify compliance with a specific requirement",
+        "reference": "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.3.31"
+      },
+      {
+        "text": "documentation specifying inputs, predicted results, and a set of execution conditions for a test item",
+        "reference": "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.1.31"
+      },
+      {
+        "text": "set of test case preconditions, inputs (including actions, where applicable), and expected results, developed to drive the execution of a test item to meet test objectives, including correct implementation, error identification, checking quality, and other valued information",
+        "reference": "ISO/IEC/IEEE 29119-1:2013 Software and systems engineering — Software testing — Part 1: Concepts and definitions, 4.48"
+      }
+    ],
+    "note": "A test case is the lowest level of test input (i.e. test cases are not made up of test cases) for the test subprocess for which it is intended"
+  }
+]

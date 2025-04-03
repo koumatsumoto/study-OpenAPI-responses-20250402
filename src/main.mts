@@ -1,9 +1,35 @@
-import OpenAI from "openai";
+import fs from 'fs/promises';
+import path from 'path';
+import * as R from 'remeda';
 
-const client = new OpenAI();
+const CHUNK_SIZE = 100;
 
-async function classifyAndTranslateTerm(jsonl: string): Promise<any> {
-  const promptTemplate = `
+interface Term {
+  number: string;
+  name: string;
+  definitions: {
+    text: string;
+    reference?: string;
+  }[];
+  confer?: string[];
+  note?: string;
+}
+
+interface ApiRequest {
+  custom_id: string;
+  method: string;
+  url: string;
+  body: {
+    model: string;
+    messages: {
+      role: string;
+      content: string;
+    }[];
+  };
+}
+
+function createPromptTemplate(jsonl: string): string {
+  return `
 以下のシステム開発用語を、定義に基づいて最適な日本語訳と全該当の分類に変換せよ。
 
 ## 分類カテゴリ
@@ -34,87 +60,9 @@ async function classifyAndTranslateTerm(jsonl: string): Promise<any> {
 ## 処理する用語データ
 ${jsonl}
 `;
-
-  try {
-    const response = await client.responses.create({
-      model: "o3-mini",
-      input: [
-        {
-          role: "system",
-          content:
-            "あなたはシステム開発用語の専門家です。定義の文脈を考慮し、適切な日本語訳と分類を行ってください。出力は指定された形式のみを含め、余計な説明は省いてください。",
-        },
-        {
-          role: "user",
-          content: promptTemplate,
-        },
-      ],
-    });
-
-    console.log("Response:", response);
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
 }
 
-const termData = [
-  {
-    number: "3.34",
-    name: "acceptance testing",
-    definitions: [
-      {
-        text: "testing conducted to determine whether a system satisfies its acceptance criteria and to enable the customer to determine whether to accept the system",
-      },
-      {
-        text: "formal testing conducted to enable a user, customer, or other authorized entity to determine whether to accept a system or component",
-        reference: "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.1",
-      },
-    ],
-    confer: ["acceptance test", "validation test"],
-  },
-  {
-    number: "3.35",
-    name: "accepted deliverables",
-    definitions: [
-      {
-        text: "products, results, or capabilities produced by a project and validated by the project customer or sponsors as meeting their specified acceptance criteria",
-        reference: "A Guide to the Project Management Body of Knowledge (PMBOK® Guide) — Fifth Edition",
-      },
-    ],
-  },
-  {
-    number: "3.4209",
-    name: "test bed",
-    definitions: [
-      {
-        text: "environment containing the hardware, instrumentation, simulators, software tools, and other support elements needed to conduct a test",
-      },
-    ],
-  },
-  {
-    number: "3.4210",
-    name: "test case",
-    definitions: [
-      {
-        text: "set of test inputs, execution conditions, and expected results developed for a particular objective, such as to exercise a particular program path or to verify compliance with a specific requirement",
-        reference: "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.3.31",
-      },
-      {
-        text: "documentation specifying inputs, predicted results, and a set of execution conditions for a test item",
-        reference: "IEEE 1012-2012 IEEE Standard for System and Software Verification and Validation, 3.1.31",
-      },
-      {
-        text: "set of test case preconditions, inputs (including actions, where applicable), and expected results, developed to drive the execution of a test item to meet test objectives, including correct implementation, error identification, checking quality, and other valued information",
-        reference:
-          "ISO/IEC/IEEE 29119-1:2013 Software and systems engineering — Software testing — Part 1: Concepts and definitions, 4.48",
-      },
-    ],
-    note: "A test case is the lowest level of test input (i.e. test cases are not made up of test cases) for the test subprocess for which it is intended",
-  },
-];
-
-function convertTermData(term: (typeof termData)[number]) {
+function convertTermData(term: Term) {
   return {
     number: term.number,
     name: term.name,
@@ -122,14 +70,63 @@ function convertTermData(term: (typeof termData)[number]) {
   };
 }
 
-function convertTermsToJSONL(terms: typeof termData) {
+function convertTermsToJSONL(terms: Term[]) {
   return terms.map((term) => JSON.stringify(convertTermData(term))).join("\n");
 }
 
+function splitTermsIntoChunks(terms: Term[]): Term[][] {
+  return R.chunk(terms, CHUNK_SIZE);
+}
+
+function generateApiRequests(chunks: Term[][]): ApiRequest[] {
+  return chunks.map((chunk, index) => {
+    const jsonl = convertTermsToJSONL(chunk);
+    return {
+      custom_id: `req-${index + 1}`,
+      method: "POST",
+      url: "/v1/responses",
+      body: {
+        model: "o3-mini",
+        messages: [
+          {
+            role: "system",
+            content: "あなたはシステム開発用語の専門家です。定義の文脈を考慮し、適切な日本語訳と分類を行ってください。出力は指定された形式のみを含め、余計な説明は省いてください。",
+          },
+          {
+            role: "user",
+            content: createPromptTemplate(jsonl),
+          },
+        ],
+      },
+    };
+  });
+}
+
 export async function main() {
-  classifyAndTranslateTerm(convertTermsToJSONL(termData))
-    .then((result) => console.log("Result:", result))
-    .catch((error) => console.error("Error:", error));
+  try {
+    // Read input file
+    const inputData = await fs.readFile(path.join('data', 'input.json'), 'utf-8');
+    const terms: Term[] = JSON.parse(inputData);
+
+    // Split terms into chunks
+    const chunks = splitTermsIntoChunks(terms);
+
+    // Generate API requests
+    const requests = generateApiRequests(chunks);
+
+    // Write output file
+    const outputPath = path.join('data', 'output.jsonl');
+    await fs.writeFile(
+      outputPath,
+      requests.map(req => JSON.stringify(req)).join('\n'),
+      'utf-8'
+    );
+
+    console.log(`Successfully wrote ${requests.length} requests to ${outputPath}`);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
 }
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1])) {
