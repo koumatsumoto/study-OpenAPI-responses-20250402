@@ -61,7 +61,7 @@ describe("Term Data Processing", () => {
       url: "/v1/responses",
       body: {
         model: "o3-mini",
-        messages: [
+        input: [
           {
             role: "system",
             content: expect.any(String),

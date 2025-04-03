@@ -21,7 +21,7 @@ interface ApiRequest {
   url: string;
   body: {
     model: string;
-    messages: {
+    input: {
       role: string;
       content: string;
     }[];
@@ -87,7 +87,7 @@ export function generateApiRequests(chunks: Term[][]): ApiRequest[] {
       url: "/v1/responses",
       body: {
         model: "o3-mini",
-        messages: [
+        input: [
           {
             role: "system",
             content: "あなたはシステム開発用語の専門家です。定義の文脈を考慮し、適切な日本語訳と分類を行ってください。出力は指定された形式のみを含め、余計な説明は省いてください。",
