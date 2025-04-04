@@ -11,7 +11,8 @@
     "build": "tsc",
     "start": "node --env-file=.env src/main.mts",
     "test": "vitest run --coverage",
-    "fmt": "prettier --write ."
+    "fmt": "prettier --write .",
+    "parse-batch-output": "node src/parse-batch-output.mts"
   },
   "repository": {
     "type": "git",
