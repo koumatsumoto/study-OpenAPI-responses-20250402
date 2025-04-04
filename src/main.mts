@@ -45,7 +45,7 @@ export function createPromptTemplate(jsonl: string): string {
 - infra: インフラ（例: サーバ構築, ネットワーク設計, クラウド設定）
 - data: データ管理・分析（例: データモデリング, 分析基盤, ETL, レポート）
 
-## 出力形式（厳守）
+## 出力形式 (JSON)
 {
   "number": "用語番号",
   "name_ja": "日本語訳",
@@ -55,7 +55,7 @@ export function createPromptTemplate(jsonl: string): string {
 ## 注意事項
 - 定義を反映した簡潔な訳にすること
 - 複数のカテゴリに当てはまる場合は全て列挙
-- 上記フォーマット以外の出力をしない
+- 結果は一つのJSONで出力すること
 
 ## 処理する用語データ
 ${jsonl}
