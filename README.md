@@ -13,5 +13,5 @@ curl -o data/input.json https://raw.githubusercontent.com/koumatsumoto/system-vo
 To prepare test data by keeping only the first line of output.jsonl:
 
 ```bash
-head -n 1 data/output.jsonl > data/output.jsonl.temp && mv data/output.jsonl.temp data/output.jsonl
+head -n 2 data/output.jsonl > data/output.jsonl.temp && mv data/output.jsonl.temp data/output.jsonl
 ```
