@@ -89,6 +89,73 @@ describe("Term Data Processing", () => {
   });
 });
 
+describe("check-batch-output", () => {
+  it("should identify and format errors correctly", async () => {
+    const mockInput = [
+      {
+        number: "1.1",
+        name: "test1",
+        definitions: [{ text: "def1" }],
+      },
+      {
+        number: "1.2",
+        name: "test2",
+        definitions: [{ text: "def2" }],
+      },
+      {
+        number: "1.3",
+        name: "test3",
+        definitions: [{ text: "def3" }],
+      },
+    ];
+
+    const mockBatchResult = [
+      {
+        number: "1.1",
+        name_ja: "",
+        categories: ["cat1"],
+      },
+      {
+        number: "1.2",
+        name_ja: "テスト2",
+        categories: [],
+      },
+      // 1.3 is missing from batch results
+    ];
+
+    vi.spyOn(fs, "readFile")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify(mockInput)))
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify(mockBatchResult)));
+
+    const mockWriteFile = vi.spyOn(fs, "writeFile").mockResolvedValue();
+
+    const checkBatchModule = await import("../src/check-batch-output.mts");
+    await checkBatchModule.main();
+
+    expect(mockWriteFile).toHaveBeenCalledWith(
+      "data/errors.json",
+      expect.stringContaining("Missing Japanese name translation"),
+      "utf-8",
+    );
+
+    const writtenContent = JSON.parse(mockWriteFile.mock.calls[0][1] as string);
+    expect(writtenContent).toEqual([
+      {
+        term: mockInput[0],
+        causes: ["Missing Japanese name translation"],
+      },
+      {
+        term: mockInput[1],
+        causes: ["No categories assigned"],
+      },
+      {
+        term: mockInput[2],
+        causes: ["No batch result found"],
+      },
+    ]);
+  });
+});
+
 describe("main function", () => {
   beforeEach(() => {
     vi.clearAllMocks();

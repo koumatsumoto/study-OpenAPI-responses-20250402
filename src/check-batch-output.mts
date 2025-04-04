@@ -18,7 +18,12 @@ interface BatchResult {
   categories: string[];
 }
 
-async function main() {
+interface ErrorEntry {
+  term: Term;
+  causes: string[];
+}
+
+export async function main() {
   try {
     // Read input files
     const inputData = await fs.readFile(path.join("data", "input.json"), "utf-8");
@@ -28,16 +33,30 @@ async function main() {
     const batchResults: BatchResult[] = JSON.parse(batchData);
 
     // Check for missing or invalid data
-    const errors: Term[] = terms.filter(term => {
-      const result = batchResults.find(r => r.number === term.number);
-      if (!result) return true;
-      if (result.name_ja === "") return true;
-      if (result.categories.length === 0) return true;
-      return false;
-    });
+    const errors: ErrorEntry[] = terms
+      .map((term): ErrorEntry | null => {
+        const result = batchResults.find((r) => r.number === term.number);
+        const causes: string[] = [];
+
+        if (!result) {
+          causes.push("No batch result found");
+          return { term, causes };
+        }
+
+        if (result.name_ja === "") {
+          causes.push("Missing Japanese name translation");
+        }
+
+        if (result.categories.length === 0) {
+          causes.push("No categories assigned");
+        }
+
+        return causes.length > 0 ? { term, causes } : null;
+      })
+      .filter((entry): entry is ErrorEntry => entry !== null);
 
     // Write errors to file
-    const outputPath = "errors.json";
+    const outputPath = "data/errors.json";
     await fs.writeFile(outputPath, JSON.stringify(errors, null, 2), "utf-8");
 
     console.log(`Found ${errors.length} errors. Written to ${outputPath}`);
